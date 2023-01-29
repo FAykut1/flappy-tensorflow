@@ -10,4 +10,5 @@ const config = {
   populationSize: 200,
   animationSpeed: 1,
   pipeGenerationTime: 100,
+  birdLocationX: 50,
 };

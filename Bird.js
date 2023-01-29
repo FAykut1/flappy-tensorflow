@@ -1,6 +1,6 @@
 class Bird {
   constructor(weights) {
-    this.x = 50;
+    this.x = config.birdLocationX;
     this.y = 20;
     this.velocity = 0;
     this.gravity = 0.25;
@@ -31,19 +31,8 @@ class Bird {
   think() {
     if (this.isDead) return;
 
-    let x = 0;
-    let y = 0;
-
-    if (pipes[0]) {
-      let diff = pipes[0].x - x;
-      if (diff < 0) {
-        x = pipes[1].x;
-        y = pipes[1].y;
-      } else {
-        x = pipes[0].x;
-        y = pipes[0].y;
-      }
-    }
+    let x = closestPipe?.x ?? canvas.width;
+    let y = closestPipe?.y ?? canvas.height / 2;
 
     // Prepare the input data for the model
     const inputTensor = tf.tensor2d([
@@ -63,13 +52,15 @@ class Bird {
 
   draw() {
     if (this.isDead) return;
-
+    ctx.beginPath();
+    ctx.fillStyle = 'black';
     ctx.fillRect(
       this.x,
       this.y,
       config.render.birdSize,
       config.render.birdSize
     );
+    ctx.stroke();
   }
 
   update() {

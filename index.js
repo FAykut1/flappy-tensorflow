@@ -6,13 +6,17 @@ var ctx = canvas.getContext('2d');
 
 const generationCountText = document.getElementById('generation');
 const populationCountText = document.getElementById('population');
+const scoreCountText = document.getElementById('score');
 
 tf.setBackend('cpu');
 
 let generation = 0;
+let score = 0;
 
 let birds = [];
 var pipes = [];
+
+let closestPipe = null;
 
 initilize();
 
@@ -33,15 +37,17 @@ function gameLoop() {
     bird.draw();
   }
 
-  // if (selectedBird != null) {
-  //   selectedBird.draw();
-  // } else {
-  //   selectBirdForDraw();
-  // }
+  if (selectedBird != null) {
+    selectedBird.draw();
+  } else {
+    selectBirdForDraw();
+  }
 
   // Draw the pipes
 
   for (let pipe of pipes) {
+    ctx.beginPath();
+    ctx.fillStyle = pipe == closestPipe ? 'red' : 'black';
     ctx.fillRect(pipe.x, 0, config.render.pipeSize, pipe.y);
     ctx.fillRect(
       pipe.x,
@@ -49,6 +55,7 @@ function gameLoop() {
       config.render.pipeSize,
       canvas.height
     );
+    ctx.stroke();
 
     // Move the pipes to the left
     pipe.x -= 2;
@@ -86,6 +93,15 @@ function gameLoop() {
     });
   }
 
+  if (pipes[0]) {
+    if (closestPipe == null) closestPipe = pipes[0];
+    let diff = closestPipe.x + config.render.pipeSize - config.birdLocationX;
+    if (diff < 0) {
+      score += 1;
+      closestPipe = pipes[1];
+    }
+  }
+
   // Update the frame count
   frameCount++;
 
@@ -98,6 +114,7 @@ function gameLoop() {
   }
   populationCountText.innerHTML =
     'Population: ' + birds.filter((v) => !v.isDead).length;
+  scoreCountText.innerHTML = 'Score: ' + score;
 
   // Request another animation frame
   requestAnimationFrame(gameLoop);
@@ -126,8 +143,10 @@ function gameOver() {
     }
     birds.map((b) => b.dispose());
     frameCount = 0;
+    score = 0;
     pipes = [];
     birds = newPopulation;
+    closestPipe = null;
     generation++;
     generationCountText.innerHTML = 'Generation: ' + generation;
   });
@@ -153,7 +172,7 @@ function mutate(weights) {
       let values = tensor.dataSync().slice();
 
       values = values.map((v) =>
-        Math.random() < config.mutationRate ? Math.random() * 2 - 1 : v
+        Math.random() < config.mutationRate ? v + gaussianRandom() : v
       );
       let newTensor = tf.tensor(values, shape);
       mutatedWeights[i] = newTensor;
@@ -164,4 +183,15 @@ function mutate(weights) {
 
 function round(number, scale = 2) {
   return Math.round(number * (10 ^ scale)) / (10 ^ scale);
+}
+
+function gaussianRandom() {
+  let u = 0,
+    v = 0;
+  while (u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+  while (v === 0) v = Math.random();
+  let num = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  num = num / 10.0 + 0.5; // Translate to 0 -> 1
+  if (num > 1 || num < 0) return gaussianRandom(); // resample between 0 and 1
+  return num;
 }
