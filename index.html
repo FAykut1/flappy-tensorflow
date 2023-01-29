@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <canvas id="game-canvas"></canvas>
+
+    <div class="ui">
+      <h1 id="generation">Generation: 1</h1>
+      <h1 id="population">Population: 0</h1>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
+    <script src="config.js"></script>
+    <script src="Bird.js"></script>
+    <script src="index.js"></script>
+
+    <style>
+      canvas {
+        border: 1px solid black;
+      }
+
+      .ui {
+        display: flex;
+        justify-content: space-between;
+      }
+    </style>
+  </body>
+</html>
